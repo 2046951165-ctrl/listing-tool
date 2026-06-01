@@ -1,6 +1,19 @@
 <!DOCTYPE html>
 <html>
-<head><meta charset="UTF-8"><title>AI 中东电商 Listing 工作台</title></head>
+<head>
+    <meta charset="UTF-8">
+    <title>AI 中东电商 Listing 工作台</title>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background: #f4f7f6; padding: 40px; }
+        .container { max-width: 800px; margin: auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        h2 { color: #2c3e50; text-align: center; }
+        input, textarea { width: 100%; margin: 10px 0; padding: 12px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
+        textarea { height: 120px; }
+        button { width: 100%; padding: 15px; background: #007bff; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 16px; font-weight: bold; }
+        button:hover { background: #0056b3; }
+        #output { background: #e9ecef; padding: 20px; border-radius: 8px; margin-top: 20px; border-left: 5px solid #007bff; white-space: pre-wrap; }
+    </style>
+</head>
 <body>
     <div class="container">
         <h2>🚀 AI 智脑重构工作台 (v2.0 高速版)</h2>
@@ -9,14 +22,14 @@
         <textarea id="rawTitle" placeholder="竞品混乱标题..."></textarea>
         <textarea id="rawBullets" placeholder="竞品混乱五点..."></textarea>
         <button id="btn" onclick="generateListing()">生成爆单文案</button>
-        <div id="output" style="white-space: pre-wrap; margin-top: 20px;"></div>
+        <div id="output">文案生成结果将在这里显示...</div>
     </div>
     <script>
         async function generateListing() {
             const btn = document.getElementById('btn');
             const outputDiv = document.getElementById('output');
             btn.disabled = true;
-            outputDiv.innerText = "正在通过云端大脑高速处理...";
+            outputDiv.innerText = "正在通过云端大脑高速处理中，请稍候...";
             
             const payload = {
                 apiKey: document.getElementById('apiKey').value.trim(),
@@ -25,13 +38,17 @@
                 bullets: document.getElementById('rawBullets').value.trim()
             };
 
-            const response = await fetch('/generate', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify(payload)
-            });
-            const data = await response.json();
-            outputDiv.innerText = data.text || data.error;
+            try {
+                const response = await fetch('/generate', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(payload)
+                });
+                const data = await response.json();
+                outputDiv.innerText = data.text || data.error;
+            } catch (err) {
+                outputDiv.innerText = "请求失败，请检查网络或 API KEY";
+            }
             btn.disabled = false;
         }
     </script>
