@@ -1,69 +1,38 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-    <meta charset="UTF-8">
-    <title>亚马逊中东站 AI 实时重构系统 v18.1</title>
-    <style>
-        :root { --primary: #8735ff; --bg: #0f172a; --text: #f1f5f9; }
-        body { font-family: sans-serif; background-color: var(--bg); color: var(--text); padding: 20px; }
-        .container { max-width: 900px; margin: auto; background: #1e293b; padding: 25px; border-radius: 12px; }
-        textarea, input { width: 100%; background: #0f172a; border: 1px solid #334155; color: white; padding: 12px; margin: 8px 0; border-radius: 6px; box-sizing: border-box; }
-        button { background: var(--primary); color: white; border: none; padding: 15px; width: 100%; cursor: pointer; border-radius: 6px; font-weight: bold; }
-        
-        /* 增加加载动画 */
-        .loader { display: none; margin: 20px auto; width: 40px; height: 40px; border: 4px solid #f3f3f3; border-top: 4px solid var(--primary); border-radius: 50%; animation: spin 1s linear infinite; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        #output { margin-top: 20px; white-space: pre-wrap; background: #0f172a; padding: 20px; border-radius: 6px; border: 1px solid #334155; line-height: 1.6; }
-    </style>
-</head>
+<html>
+<head><meta charset="UTF-8"><title>AI 中东电商 Listing 工作台</title></head>
 <body>
     <div class="container">
-        <h2>🚀 AI 智脑重构工作台 (v18.1 加速版)</h2>
+        <h2>🚀 AI 智脑重构工作台 (v2.0 高速版)</h2>
         <input type="text" id="apiKey" placeholder="在此粘贴你的 API KEY (AIza...)">
-        <input type="text" id="chinaKeyword" placeholder="输入核心中文词 (如：量杯)">
+        <input type="text" id="chinaKeyword" placeholder="输入核心中文关键词">
         <textarea id="rawTitle" placeholder="竞品混乱标题..."></textarea>
         <textarea id="rawBullets" placeholder="竞品混乱五点..."></textarea>
         <button id="btn" onclick="generateListing()">生成爆单文案</button>
-        <div class="loader" id="loader"></div>
-        <div id="output">文案生成结果将显示在此...</div>
+        <div id="output" style="white-space: pre-wrap; margin-top: 20px;"></div>
     </div>
-
-    <script src="https://cdn.jsdelivr.net/npm/@google/generative-ai@0.1.0/dist/index.min.js"></script>
     <script>
         async function generateListing() {
-            const apiKey = document.getElementById('apiKey').value.trim();
-            const keyword = document.getElementById('chinaKeyword').value.trim();
-            const title = document.getElementById('rawTitle').value.trim();
-            const bullets = document.getElementById('rawBullets').value.trim();
-            
             const btn = document.getElementById('btn');
-            const loader = document.getElementById('loader');
             const outputDiv = document.getElementById('output');
+            btn.disabled = true;
+            outputDiv.innerText = "正在通过云端大脑高速处理...";
+            
+            const payload = {
+                apiKey: document.getElementById('apiKey').value.trim(),
+                keyword: document.getElementById('chinaKeyword').value.trim(),
+                title: document.getElementById('rawTitle').value.trim(),
+                bullets: document.getElementById('rawBullets').value.trim()
+            };
 
-            btn.disabled = true; loader.style.display = 'block';
-            outputDiv.innerText = "正在为您调用中东站 Cosmo 算法逻辑进行深度语义解构...";
-
-            const genAI = new google.generativeAI.GoogleGenerativeAI(apiKey);
-            const model = genAI.getGenerativeModel({ model: "gemini-pro" });
-
-            // 深度优化后的高密度推理指令（减少不必要推理冗余）
-            const prompt = `你是精通阿联酋/沙特站点的跨境电商专家。根据以下输入：关键词"${keyword}"，标题"${title}"，五点"${bullets}"。
-            1. 请基于产品功能和中东环境(高温/干燥)重构文案。
-            2. 严禁出现 & 符号，一律用 and；严禁出现 perfect/best 等虚假词，用 reliable 等客观词代替。
-            3. 输出：
-            - Title: 严格200字符内，核心词+材质+场景。
-            - 5 Points: 1100字符内，必须带Emoji锚点+英文大写小标题。
-            - Keywords: 3-5个精准大词 + 5-8个场景长尾词。
-            直接输出结果，保持逻辑精简。`;
-
-            try {
-                const result = await model.generateContent(prompt);
-                outputDiv.innerText = result.response.text();
-            } catch (e) {
-                outputDiv.innerText = "调用失败：" + e.message;
-            } finally {
-                btn.disabled = false; loader.style.display = 'none';
-            }
+            const response = await fetch('/generate', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(payload)
+            });
+            const data = await response.json();
+            outputDiv.innerText = data.text || data.error;
+            btn.disabled = false;
         }
     </script>
 </body>
